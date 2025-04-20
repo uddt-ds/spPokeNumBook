@@ -46,7 +46,7 @@ class PhoneBookViewController: UIViewController {
     }
 
     override func viewWillAppear(_ animated: Bool) {
-        navigationController?.isNavigationBarHidden = false
+        setNavigationController()
     }
 
     private func configureUI() {
@@ -78,5 +78,17 @@ class PhoneBookViewController: UIViewController {
             $0.leading.trailing.equalToSuperview().inset(30)
             $0.height.equalTo(40)
         }
+    }
+}
+
+extension PhoneBookViewController {
+    private func setNavigationController() {
+        navigationController?.isNavigationBarHidden = false
+        navigationItem.title = "연락처 추가"
+        navigationItem.rightBarButtonItem = UIBarButtonItem(title: "적용", style: .plain, target: self, action: #selector(buttonTapped))
+    }
+
+    @objc func buttonTapped() {
+        print("버튼이 선택되었습니다.")
     }
 }
