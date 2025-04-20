@@ -14,7 +14,7 @@ class ViewController: UIViewController {
         let label = UILabel()
         label.text = "친구 목록"
         label.textColor = .black
-        label.font = .boldSystemFont(ofSize: 30)
+        label.font = .boldSystemFont(ofSize: 20)
         label.textAlignment = .center
         return label
     }()
@@ -24,7 +24,7 @@ class ViewController: UIViewController {
         button.setTitle("추가", for: .normal)
         button.setTitleColor(.gray, for: .normal)
         button.backgroundColor = .white
-//        button.addTarget(self, action: <#T##Selector#>, for: <#T##UIControl.Event#>)
+        button.addTarget(self, action: #selector(buttonTapped), for: .touchDown)
         return button
     }()
 
@@ -42,12 +42,16 @@ class ViewController: UIViewController {
         tableView.dataSource = self
     }
 
-    func configureUI() {
+    override func viewWillAppear(_ animated: Bool) {
+        navigationController?.isNavigationBarHidden = true
+    }
+
+    private func configureUI() {
         view.backgroundColor = .white
         [label, addButton, tableView].forEach { view.addSubview($0) }
 
         label.snp.makeConstraints {
-            $0.top.equalToSuperview().offset(70)
+            $0.top.equalToSuperview().offset(80)
             $0.centerX.equalToSuperview()
         }
 
@@ -57,13 +61,19 @@ class ViewController: UIViewController {
         }
 
         tableView.snp.makeConstraints {
-            $0.top.equalTo(label.snp.bottom).offset(70)
+            $0.top.equalTo(label.snp.bottom).offset(50)
             $0.bottom.equalToSuperview().offset(-60)
             $0.leading.equalToSuperview().offset(20)
             $0.trailing.equalToSuperview().offset(-20)
             $0.centerX.equalTo(label.snp.centerX)
         }
     }
+
+    @objc func buttonTapped() {
+        let secondView = PhoneBookViewController()
+        navigationController?.pushViewController(secondView, animated: false)
+    }
+
 }
 
 extension ViewController: UITableViewDelegate {
