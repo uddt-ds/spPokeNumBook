@@ -10,8 +10,7 @@ import UIKit
 class PhoneBookViewController: UIViewController {
     private lazy var profileImageView: UIImageView = {
         let imageView = UIImageView()
-        imageView.contentMode = .scaleAspectFit
-        imageView.image = UIImage(named: "")
+        imageView.contentMode = .center
         imageView.layer.cornerRadius = 70
         imageView.layer.borderWidth = 2
         imageView.layer.borderColor = UIColor.gray.cgColor
@@ -24,7 +23,7 @@ class PhoneBookViewController: UIViewController {
         button.setTitle("랜덤 이미지 생성", for: .normal)
         button.setTitleColor(.gray, for: .normal)
         button.titleLabel?.font = .systemFont(ofSize: 15)
-        button.addTarget(self, action: #selector(imageChangeBTTapped), for: .touchDown)
+        button.addTarget(self, action: #selector(imageChangeBtnTapped), for: .touchDown)
         return button
     }()
 
@@ -82,20 +81,30 @@ class PhoneBookViewController: UIViewController {
         }
     }
 
-    @objc func imageChangeBTTapped() {
+    @objc func imageChangeBtnTapped() {
         let randomNumber = Int.random(in: 1...251)
-        let url = URL(string: "https://pokeapi.co/api/v2/pokemon/\(randomNumber)")
-        guard let url else { return }
 
-        fetchData(url: url) { [weak self] data in
-            guard let imageUrl = URL(string: "\(data.sprites.versions.generationSecond.gold.frontDefault)") else {
-                return
-            }
-            if let data = try? Data(contentsOf: imageUrl) {
-                if let image = UIImage(data: data) {
-                    DispatchQueue.main.async {
-                        self?.profileImageView.image = image
+        let url = URL(string: "https://pokeapi.co/api/v2/pokemon/\(randomNumber)")
+        guard let url else {
+            return
+        }
+
+        try? fetchData(url: url) { [weak self] data in
+            switch data {
+            case .success(let data):
+                guard let imageUrl = URL(string: "\(data.sprites.versions.generationSecond.gold.frontDefault)") else {
+                    return
+                }
+                if let data = try? Data(contentsOf: imageUrl) {
+                    if let image = UIImage(data: data, scale: 0.5) {
+                        DispatchQueue.main.async {
+                            self?.profileImageView.image = image
+                        }
                     }
+                }
+            case .failure(let error):
+                DispatchQueue.main.async {
+                    self?.showAlert(error: error)
                 }
             }
         }
@@ -116,7 +125,7 @@ extension PhoneBookViewController {
 
 
 extension PhoneBookViewController {
-    private func fetchData(url: URL, completion: @escaping (PocketmonData) -> Void) {
+    private func fetchData(url: URL, completion: @escaping (Result<PocketmonData, CustomError>) -> Void) throws {
         let myUrlSession = URLSession(configuration: .default)
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
@@ -124,24 +133,31 @@ extension PhoneBookViewController {
 
         myUrlSession.dataTask(with: request) { data, response, error in
             guard let data, error == nil else {
-                print("데이터 로드 실패")
+                completion(.failure(.dataError))
                 return
             }
 
             let successRange = (200..<300)
             guard let response = response as? HTTPURLResponse else {
-                print("응답 오류")
+                completion(.failure(.responseFail))
                 return
             }
 
             if successRange.contains(response.statusCode) {
                 guard let decodedData = try? JSONDecoder().decode(PocketmonData.self, from: data) else {
-                    print("JSON 디코딩 실패")
+                    completion(.failure(.decodingError))
                     return
                 }
-                completion(decodedData)
+                completion(.success(decodedData))
             }
         }.resume()
     }
 }
 
+extension PhoneBookViewController {
+    func showAlert(error: CustomError) {
+        let alert = UIAlertController(title: "에러", message: error.errorTitle, preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "확인", style: .default))
+        present(alert, animated: true)
+    }
+}
