@@ -6,11 +6,15 @@
 //
 
 import UIKit
+import CoreData
 
 class PhoneBookViewController: UIViewController {
+
+   static var container: NSPersistentContainer?
+
     private lazy var profileImageView: UIImageView = {
         let imageView = UIImageView()
-        imageView.contentMode = .center
+        imageView.contentMode = .scaleAspectFit
         imageView.layer.cornerRadius = 70
         imageView.layer.borderWidth = 2
         imageView.layer.borderColor = UIColor.gray.cgColor
@@ -44,6 +48,7 @@ class PhoneBookViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         configureUI()
+        setContainer()
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -96,7 +101,7 @@ class PhoneBookViewController: UIViewController {
                     return
                 }
                 if let data = try? Data(contentsOf: imageUrl) {
-                    if let image = UIImage(data: data, scale: 0.5) {
+                    if let image = UIImage(data: data) {
                         DispatchQueue.main.async {
                             self?.profileImageView.image = image
                         }
@@ -109,6 +114,11 @@ class PhoneBookViewController: UIViewController {
             }
         }
     }
+
+    private func setContainer() {
+        let appDelegate = UIApplication.shared.delegate as! AppDelegate
+        PhoneBookViewController.container = appDelegate.persistentContainer
+    }
 }
 
 extension PhoneBookViewController {
@@ -119,7 +129,11 @@ extension PhoneBookViewController {
     }
 
     @objc func buttonTapped() {
-        print("버튼이 선택되었습니다.")
+        let nameData = nameTextField.text ?? ""
+        let phoneNumberData = phoneNumberTextField.text ?? ""
+        guard let image = self.profileImageView.image?.pngData() else { return }
+        createData(name: nameData, phoneNumber: phoneNumberData, image: image)
+        navigationController?.popViewController(animated: true)
     }
 }
 
@@ -159,5 +173,22 @@ extension PhoneBookViewController {
         let alert = UIAlertController(title: "에러", message: error.errorTitle, preferredStyle: .alert)
         alert.addAction(UIAlertAction(title: "확인", style: .default))
         present(alert, animated: true)
+    }
+}
+
+extension PhoneBookViewController {
+
+    func createData(name: String, phoneNumber: String, image: Data) {
+        guard let entity = NSEntityDescription.entity(forEntityName: "PhoneBook", in: PhoneBookViewController.container!.viewContext) else { return }
+        let newPhoneBook = NSManagedObject(entity: entity, insertInto: PhoneBookViewController.container?.viewContext)
+        newPhoneBook.setValue(name, forKey: "name")
+        newPhoneBook.setValue(phoneNumber, forKey: "phoneNumber")
+        newPhoneBook.setValue(image, forKey: "image")
+        do {
+            try PhoneBookViewController.container?.viewContext.save()
+            print("문맥 저장 성공")
+        } catch {
+            print("문맥 저장 실패")
+        }
     }
 }

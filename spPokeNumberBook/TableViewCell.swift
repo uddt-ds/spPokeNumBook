@@ -13,7 +13,7 @@ class TableViewCell: UITableViewCell {
 
     let nameLabel: UILabel = {
         let label = UILabel()
-        label.text = "name"
+        label.text = ""
         label.textColor = .black
         label.font = .systemFont(ofSize: 16)
         label.textAlignment = .center
@@ -22,16 +22,26 @@ class TableViewCell: UITableViewCell {
 
     let phoneNumLabel: UILabel = {
         let label = UILabel()
-        label.text = "010-0000-0000"
+        label.text = ""
         label.textColor = .black
         label.font = .systemFont(ofSize: 16)
         label.textAlignment = .center
         return label
     }()
 
+    let profileImageView: UIImageView = {
+        let imageView = UIImageView()
+        imageView.contentMode = .scaleAspectFit
+        imageView.layer.borderColor = UIColor.black.cgColor
+        imageView.layer.borderWidth = 1
+        imageView.layer.cornerRadius = 25
+        return imageView
+    }()
+
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         configureUI()
+        
     }
     
     required init?(coder: NSCoder) {
@@ -40,32 +50,30 @@ class TableViewCell: UITableViewCell {
 
     private func configureUI() {
 
-        let imageView: UIImageView = {
-            let imageView = UIImageView()
-            imageView.contentMode = .scaleAspectFill
-            imageView.image = UIImage(named: "")
-            imageView.layer.borderColor = UIColor.black.cgColor
-            imageView.layer.borderWidth = 1
-            imageView.layer.cornerRadius = 25
-            return imageView
-        }()
+        [profileImageView, nameLabel, phoneNumLabel].forEach { contentView.addSubview($0) }
 
-        [imageView, nameLabel, phoneNumLabel].forEach { contentView.addSubview($0) }
-
-        imageView.snp.makeConstraints {
+        profileImageView.snp.makeConstraints {
             $0.height.width.equalTo(50)
             $0.centerY.equalTo(contentView.snp.centerY)
             $0.leading.equalTo(contentView.snp.leading).offset(20)
         }
 
         nameLabel.snp.makeConstraints {
-            $0.centerY.equalTo(imageView.snp.centerY)
-            $0.leading.equalTo(imageView.snp.trailing).offset(20)
+            $0.centerY.equalTo(profileImageView.snp.centerY)
+            $0.leading.equalTo(profileImageView.snp.trailing).offset(20)
         }
 
         phoneNumLabel.snp.makeConstraints {
-            $0.centerY.equalTo(imageView.snp.centerY)
+            $0.centerY.equalTo(profileImageView.snp.centerY)
             $0.trailing.equalTo(contentView.snp.trailing).offset(-20)
         }
     }
+
+    public func configureCell(phoneBookData: PhoneBook) {
+        self.nameLabel.text = phoneBookData.name
+        self.phoneNumLabel.text = phoneBookData.phoneNumber
+        guard let profileImage = phoneBookData.image else { return }
+        self.profileImageView.image = UIImage(data: profileImage)
+    }
 }
+

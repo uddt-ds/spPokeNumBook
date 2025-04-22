@@ -7,8 +7,11 @@
 
 import UIKit
 import SnapKit
+import CoreData
 
 class ViewController: UIViewController {
+
+    var phoneBookData = [PhoneBook]()
 
     private let label: UILabel = {
         let label = UILabel()
@@ -28,22 +31,22 @@ class ViewController: UIViewController {
         return button
     }()
 
-    private let tableView: UITableView = {
+    private lazy var tableView: UITableView = {
         let tableView = UITableView()
         tableView.register(TableViewCell.self, forCellReuseIdentifier: TableViewCell.id)
+        tableView.delegate = self
+        tableView.dataSource = self
         return tableView
     }()
-
 
     override func viewDidLoad() {
         super.viewDidLoad()
         configureUI()
-        tableView.delegate = self
-        tableView.dataSource = self
     }
 
     override func viewWillAppear(_ animated: Bool) {
         navigationController?.isNavigationBarHidden = true
+        readAllData()
     }
 
     private func configureUI() {
@@ -88,11 +91,24 @@ extension ViewController: UITableViewDataSource {
         guard let cell = tableView.dequeueReusableCell(withIdentifier: TableViewCell.id) as? TableViewCell else {
             return UITableViewCell()
         }
+        cell.configureCell(phoneBookData: phoneBookData[indexPath.row])
         return cell
     }
 
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        7
+        phoneBookData.count
     }
 
+}
+
+extension ViewController {
+    func readAllData() {
+        do {
+            guard let phoneBooks = try PhoneBookViewController.container?.viewContext.fetch(PhoneBook.fetchRequest()) else { return }
+            phoneBookData = phoneBooks
+            self.tableView.reloadData()
+        } catch {
+            print("데이터 읽기 실패")
+        }
+    }
 }
