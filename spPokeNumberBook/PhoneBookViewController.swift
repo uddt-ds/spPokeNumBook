@@ -34,6 +34,7 @@ class PhoneBookViewController: UIViewController {
     let nameTextField: UITextField = {
         let textfield = UITextField()
         textfield.borderStyle = .roundedRect
+        textfield.placeholder = "이름"
         textfield.font = .systemFont(ofSize: 15)
         return textfield
     }()
@@ -41,6 +42,7 @@ class PhoneBookViewController: UIViewController {
     let phoneNumberTextField: UITextField = {
         let textfield = UITextField()
         textfield.borderStyle = .roundedRect
+        textfield.placeholder = "연락처"
         textfield.font = .systemFont(ofSize: 15)
         return textfield
     }()
@@ -48,7 +50,6 @@ class PhoneBookViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         configureUI()
-        setContainer()
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -114,11 +115,6 @@ class PhoneBookViewController: UIViewController {
             }
         }
     }
-
-    private func setContainer() {
-        let appDelegate = UIApplication.shared.delegate as! AppDelegate
-        PhoneBookViewController.container = appDelegate.persistentContainer
-    }
 }
 
 extension PhoneBookViewController {
@@ -170,7 +166,7 @@ extension PhoneBookViewController {
 
 extension PhoneBookViewController {
     func showAlert(error: CustomError) {
-        let alert = UIAlertController(title: "에러", message: error.errorTitle, preferredStyle: .alert)
+        let alert = UIAlertController(title: "오류", message: error.errorTitle, preferredStyle: .alert)
         alert.addAction(UIAlertAction(title: "확인", style: .default))
         present(alert, animated: true)
     }
@@ -179,16 +175,16 @@ extension PhoneBookViewController {
 extension PhoneBookViewController {
 
     func createData(name: String, phoneNumber: String, image: Data) {
-        guard let entity = NSEntityDescription.entity(forEntityName: "PhoneBook", in: PhoneBookViewController.container!.viewContext) else { return }
+        guard let entity = NSEntityDescription.entity(forEntityName: PhoneBook.className, in: PhoneBookViewController.container!.viewContext) else { return }
         let newPhoneBook = NSManagedObject(entity: entity, insertInto: PhoneBookViewController.container?.viewContext)
-        newPhoneBook.setValue(name, forKey: "name")
-        newPhoneBook.setValue(phoneNumber, forKey: "phoneNumber")
-        newPhoneBook.setValue(image, forKey: "image")
+        newPhoneBook.setValue(name, forKey: PhoneBook.Key.name)
+        newPhoneBook.setValue(phoneNumber, forKey: PhoneBook.Key.phoneNumber)
+        newPhoneBook.setValue(image, forKey: PhoneBook.Key.image)
         do {
             try PhoneBookViewController.container?.viewContext.save()
-            print("문맥 저장 성공")
+            print("연락처 저장 성공")
         } catch {
-            print("문맥 저장 실패")
+            print("연락처 저장 실패")
         }
     }
 }

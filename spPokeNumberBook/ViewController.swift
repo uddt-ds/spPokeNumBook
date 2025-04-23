@@ -17,7 +17,7 @@ class ViewController: UIViewController {
         let label = UILabel()
         label.text = "친구 목록"
         label.textColor = .black
-        label.font = .boldSystemFont(ofSize: 20)
+        label.font = .boldSystemFont(ofSize: 25)
         label.textAlignment = .center
         return label
     }()
@@ -25,8 +25,10 @@ class ViewController: UIViewController {
     private lazy var addButton: UIButton = {
         let button = UIButton()
         button.setTitle("추가", for: .normal)
-        button.setTitleColor(.gray, for: .normal)
-        button.backgroundColor = .white
+        button.setTitleColor(.white, for: .normal)
+        button.layer.borderWidth = 1
+        button.layer.cornerRadius = 5
+        button.backgroundColor = .red
         button.addTarget(self, action: #selector(buttonTapped), for: .touchDown)
         return button
     }()
@@ -46,11 +48,14 @@ class ViewController: UIViewController {
 
     override func viewWillAppear(_ animated: Bool) {
         navigationController?.isNavigationBarHidden = true
+        setContainer()
         readAllData()
     }
 
     private func configureUI() {
+
         view.backgroundColor = .white
+
         [label, addButton, tableView].forEach { view.addSubview($0) }
 
         label.snp.makeConstraints {
@@ -61,6 +66,8 @@ class ViewController: UIViewController {
         addButton.snp.makeConstraints {
             $0.centerY.equalTo(label.snp.centerY)
             $0.trailing.equalToSuperview().offset(-30)
+            $0.width.equalTo(50)
+            $0.height.equalTo(30)
         }
 
         tableView.snp.makeConstraints {
@@ -86,7 +93,6 @@ extension ViewController: UITableViewDelegate {
 }
 
 extension ViewController: UITableViewDataSource {
-
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         guard let cell = tableView.dequeueReusableCell(withIdentifier: TableViewCell.id) as? TableViewCell else {
             return UITableViewCell()
@@ -98,17 +104,25 @@ extension ViewController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         phoneBookData.count
     }
-
 }
 
 extension ViewController {
     func readAllData() {
         do {
             guard let phoneBooks = try PhoneBookViewController.container?.viewContext.fetch(PhoneBook.fetchRequest()) else { return }
-            phoneBookData = phoneBooks
+            phoneBookData = phoneBooks.sorted {
+                return $0.name ?? "" < $1.name ?? ""
+            }
             self.tableView.reloadData()
         } catch {
             print("데이터 읽기 실패")
         }
+    }
+}
+
+extension ViewController {
+    private func setContainer() {
+        let appDelegate = UIApplication.shared.delegate as! AppDelegate
+        PhoneBookViewController.container = appDelegate.persistentContainer
     }
 }

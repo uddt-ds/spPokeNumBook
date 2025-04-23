@@ -13,7 +13,6 @@ class TableViewCell: UITableViewCell {
 
     let nameLabel: UILabel = {
         let label = UILabel()
-        label.text = ""
         label.textColor = .black
         label.font = .systemFont(ofSize: 16)
         label.textAlignment = .center
@@ -22,7 +21,6 @@ class TableViewCell: UITableViewCell {
 
     let phoneNumLabel: UILabel = {
         let label = UILabel()
-        label.text = ""
         label.textColor = .black
         label.font = .systemFont(ofSize: 16)
         label.textAlignment = .center
@@ -31,7 +29,7 @@ class TableViewCell: UITableViewCell {
 
     let profileImageView: UIImageView = {
         let imageView = UIImageView()
-        imageView.contentMode = .scaleAspectFit
+        imageView.contentMode = .center
         imageView.layer.borderColor = UIColor.black.cgColor
         imageView.layer.borderWidth = 1
         imageView.layer.cornerRadius = 25
@@ -41,15 +39,13 @@ class TableViewCell: UITableViewCell {
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         configureUI()
-        
     }
-    
+
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
 
     private func configureUI() {
-
         [profileImageView, nameLabel, phoneNumLabel].forEach { contentView.addSubview($0) }
 
         profileImageView.snp.makeConstraints {
@@ -69,11 +65,11 @@ class TableViewCell: UITableViewCell {
         }
     }
 
-    public func configureCell(phoneBookData: PhoneBook) {
+    func configureCell(phoneBookData: PhoneBook) {
         self.nameLabel.text = phoneBookData.name
         self.phoneNumLabel.text = phoneBookData.phoneNumber
         guard let profileImage = phoneBookData.image else { return }
-        self.profileImageView.image = UIImage(data: profileImage)
+        self.profileImageView.image = UIImage(data: profileImage, scale: 1.3)
     }
 }
 
