@@ -80,11 +80,12 @@ class ViewController: UIViewController {
     }
 
     @objc func buttonTapped() {
-        let secondView = PhoneBookViewController()
-        navigationController?.pushViewController(secondView, animated: false)
+        navigationController?.pushViewController(PhoneBookViewController(), animated: false)
     }
 
 }
+
+// 질문: 이거 인스턴스 계속 만드는거 맞아요? 네네
 
 extension ViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
@@ -103,6 +104,17 @@ extension ViewController: UITableViewDataSource {
 
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         phoneBookData.count
+    }
+
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        tableView.deselectRow(at: indexPath, animated: true)
+
+        let secondView = PhoneBookViewController()
+        navigationController?.pushViewController(secondView, animated: true)
+
+        secondView.nameTextField.text = phoneBookData[indexPath.row].name
+        secondView.phoneNumberTextField.text = phoneBookData[indexPath.row].phoneNumber
+        secondView.profileImageView.image = UIImage(data: phoneBookData[indexPath.row].image!)
     }
 }
 

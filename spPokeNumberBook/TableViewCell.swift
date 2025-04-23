@@ -33,6 +33,8 @@ class TableViewCell: UITableViewCell {
         imageView.layer.borderColor = UIColor.black.cgColor
         imageView.layer.borderWidth = 1
         imageView.layer.cornerRadius = 25
+        imageView.backgroundColor = .white
+        imageView.clipsToBounds = true
         return imageView
     }()
 

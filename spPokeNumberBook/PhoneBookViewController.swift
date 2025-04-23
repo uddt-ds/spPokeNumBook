@@ -12,7 +12,7 @@ class PhoneBookViewController: UIViewController {
 
    static var container: NSPersistentContainer?
 
-    private lazy var profileImageView: UIImageView = {
+    lazy var profileImageView: UIImageView = {
         let imageView = UIImageView()
         imageView.contentMode = .scaleAspectFit
         imageView.layer.cornerRadius = 70
@@ -127,8 +127,15 @@ extension PhoneBookViewController {
     @objc func buttonTapped() {
         let nameData = nameTextField.text ?? ""
         let phoneNumberData = phoneNumberTextField.text ?? ""
-        guard let image = self.profileImageView.image?.pngData() else { return }
+        if nameData.isEmpty && phoneNumberData.isEmpty {
+            showAlert(error: .mustInput)
+        }
+        guard let image = self.profileImageView.image?.pngData() else {
+            showAlert(error: .mustImage)
+            return
+        }
         createData(name: nameData, phoneNumber: phoneNumberData, image: image)
+
         navigationController?.popViewController(animated: true)
     }
 }

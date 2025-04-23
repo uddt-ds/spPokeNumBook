@@ -13,6 +13,8 @@ enum CustomError: Error {
     case dataError
     case responseFail
     case decodingError
+    case mustInput
+    case mustImage
 
     var errorTitle: String {
         switch self {
@@ -26,6 +28,10 @@ enum CustomError: Error {
             return "응답에 실패하였습니다."
         case .decodingError:
             return "데이터 디코딩에 실패하였습니다."
+        case .mustInput:
+            return "이름과 전화번호를 입력해주세요"
+        case .mustImage:
+            return "랜덤 이미지 생성으로 포켓몬을 잡아주세요"
         }
     }
 }
