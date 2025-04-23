@@ -85,8 +85,6 @@ class ViewController: UIViewController {
 
 }
 
-// 질문: 이거 인스턴스 계속 만드는거 맞아요? 네네
-
 extension ViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         70
@@ -110,11 +108,16 @@ extension ViewController: UITableViewDataSource {
         tableView.deselectRow(at: indexPath, animated: true)
 
         let secondView = PhoneBookViewController()
+        secondView.isEditingBook = phoneBookData[indexPath.row]
         navigationController?.pushViewController(secondView, animated: true)
 
         secondView.nameTextField.text = phoneBookData[indexPath.row].name
         secondView.phoneNumberTextField.text = phoneBookData[indexPath.row].phoneNumber
-        secondView.profileImageView.image = UIImage(data: phoneBookData[indexPath.row].image!)
+
+        if let imageData = phoneBookData[indexPath.row].image {
+            secondView.profileImageView.image = UIImage(data: imageData)
+        }
+
     }
 }
 

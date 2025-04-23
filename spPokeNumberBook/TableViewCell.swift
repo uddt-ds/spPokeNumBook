@@ -70,8 +70,9 @@ class TableViewCell: UITableViewCell {
     func configureCell(phoneBookData: PhoneBook) {
         self.nameLabel.text = phoneBookData.name
         self.phoneNumLabel.text = phoneBookData.phoneNumber
-        guard let profileImage = phoneBookData.image else { return }
-        self.profileImageView.image = UIImage(data: profileImage, scale: 1.3)
+        if let imageData = phoneBookData.image {
+            self.profileImageView.image = UIImage(data: imageData, scale: 1.3)
+        }
     }
 }
 

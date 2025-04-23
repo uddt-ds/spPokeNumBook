@@ -12,6 +12,8 @@ class PhoneBookViewController: UIViewController {
 
    static var container: NSPersistentContainer?
 
+    var isEditingBook: PhoneBook?
+
     lazy var profileImageView: UIImageView = {
         let imageView = UIImageView()
         imageView.contentMode = .scaleAspectFit
@@ -125,16 +127,13 @@ extension PhoneBookViewController {
     }
 
     @objc func buttonTapped() {
-        let nameData = nameTextField.text ?? ""
-        let phoneNumberData = phoneNumberTextField.text ?? ""
-        if nameData.isEmpty && phoneNumberData.isEmpty {
-            showAlert(error: .mustInput)
+
+        if isEditingBook == nil {
+            createBookList()
+        } else {
+            guard let updateBook = isEditingBook else { return }
+            updateBookList(phoneBook: updateBook)
         }
-        guard let image = self.profileImageView.image?.pngData() else {
-            showAlert(error: .mustImage)
-            return
-        }
-        createData(name: nameData, phoneNumber: phoneNumberData, image: image)
 
         navigationController?.popViewController(animated: true)
     }
@@ -172,14 +171,6 @@ extension PhoneBookViewController {
 }
 
 extension PhoneBookViewController {
-    func showAlert(error: CustomError) {
-        let alert = UIAlertController(title: "오류", message: error.errorTitle, preferredStyle: .alert)
-        alert.addAction(UIAlertAction(title: "확인", style: .default))
-        present(alert, animated: true)
-    }
-}
-
-extension PhoneBookViewController {
 
     func createData(name: String, phoneNumber: String, image: Data) {
         guard let entity = NSEntityDescription.entity(forEntityName: PhoneBook.className, in: PhoneBookViewController.container!.viewContext) else { return }
@@ -193,5 +184,52 @@ extension PhoneBookViewController {
         } catch {
             print("연락처 저장 실패")
         }
+    }
+
+    private func createBookList() {
+        let nameData = nameTextField.text ?? ""
+        let phoneNumberData = phoneNumberTextField.text ?? ""
+        if nameData.isEmpty || phoneNumberData.isEmpty {
+            showAlert(error: .mustInput)
+            return
+        }
+        guard let image = self.profileImageView.image?.pngData() else {
+            showAlert(error: .mustImage)
+            return
+        }
+
+        createData(name: nameData, phoneNumber: phoneNumberData, image: image)
+    }
+
+    private func updateBookList(phoneBook: PhoneBook) {
+        let nameData = nameTextField.text ?? ""
+        let phoneNumberData = phoneNumberTextField.text ?? ""
+        if nameData.isEmpty || phoneNumberData.isEmpty {
+            showAlert(error: .mustInput)
+            return
+        }
+        guard let image = self.profileImageView.image?.pngData() else {
+            showAlert(error: .mustImage)
+            return
+        }
+
+        phoneBook.name = nameData
+        phoneBook.phoneNumber = phoneNumberData
+        phoneBook.image = image
+
+        do {
+            try PhoneBookViewController.container?.viewContext.save()
+            print("연락처 저장 성공")
+        } catch {
+            print("연락처 저장 실패")
+        }
+    }
+}
+
+extension PhoneBookViewController {
+    func showAlert(error: CustomError) {
+        let alert = UIAlertController(title: "오류", message: error.errorTitle, preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "확인", style: .default))
+        present(alert, animated: true)
     }
 }
