@@ -59,3 +59,17 @@
    이미지를 생성하지 않고 적용 버튼을 누르면 Alert 메시지가 뜨도록 예외처리하였습니다.
      
 ---
+
+## 주요 학습 내용
+1. **정렬 관련**
+https://uddt.tistory.com/241
+
+2. **프로젝트 여정 몰아보기** 
+https://uddt.tistory.com/244
+
+## 트러블 슈팅
+1. **이미지 크기 관련**
+https://uddt.tistory.com/237
+
+2. **View 이동 간 컴포넌트가 겹치는 현상**
+https://uddt.tistory.com/228
