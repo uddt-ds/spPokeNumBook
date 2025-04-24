@@ -11,6 +11,7 @@ import CoreData
 
 class ViewController: UIViewController {
 
+    // NSManagedObject를 담는 배열
     var phoneBookData = [PhoneBook]()
 
     private let label: UILabel = {
@@ -46,14 +47,15 @@ class ViewController: UIViewController {
         configureUI()
     }
 
+    //MARK: view의 로드 직전마다 반영
     override func viewWillAppear(_ animated: Bool) {
         navigationController?.isNavigationBarHidden = true
         setContainer()
         readAllData()
     }
 
+    //MARK: UI를 view에 반영해주는 메서드
     private func configureUI() {
-
         view.backgroundColor = .white
 
         [label, addButton, tableView].forEach { view.addSubview($0) }
@@ -79,18 +81,21 @@ class ViewController: UIViewController {
         }
     }
 
+    //MARK: "추가" 버튼 클릭 event
     @objc func buttonTapped() {
         navigationController?.pushViewController(PhoneBookViewController(), animated: false)
     }
 
 }
 
+//MARK: tableView 높이 설정(Delegate)
 extension ViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         70
     }
 }
 
+//MARK: tableView 설정, 셀 선택 시 event
 extension ViewController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         guard let cell = tableView.dequeueReusableCell(withIdentifier: TableViewCell.id) as? TableViewCell else {
@@ -108,8 +113,8 @@ extension ViewController: UITableViewDataSource {
         tableView.deselectRow(at: indexPath, animated: true)
 
         let secondView = PhoneBookViewController()
+        // isEditiongBook에 데이터가 있으면 secondView에 데이터 반영
         secondView.isEditingBook = phoneBookData[indexPath.row]
-        navigationController?.pushViewController(secondView, animated: true)
 
         secondView.nameTextField.text = phoneBookData[indexPath.row].name
         secondView.phoneNumberTextField.text = phoneBookData[indexPath.row].phoneNumber
@@ -118,13 +123,16 @@ extension ViewController: UITableViewDataSource {
             secondView.profileImageView.image = UIImage(data: imageData)
         }
 
+        navigationController?.pushViewController(secondView, animated: true)
     }
 }
 
+// MARK: container에 저장된 데이터 불러오는 메서드
 extension ViewController {
     func readAllData() {
         do {
             guard let phoneBooks = try PhoneBookViewController.container?.viewContext.fetch(PhoneBook.fetchRequest()) else { return }
+            // 불러오면서 이름을 기준으로 데이터 정렬
             phoneBookData = phoneBooks.sorted {
                 return $0.name ?? "" < $1.name ?? ""
             }
@@ -135,6 +143,7 @@ extension ViewController {
     }
 }
 
+// MARK: VC의 container를 세팅하는 메서드
 extension ViewController {
     private func setContainer() {
         let appDelegate = UIApplication.shared.delegate as! AppDelegate

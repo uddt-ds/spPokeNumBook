@@ -10,8 +10,10 @@ import CoreData
 
 class PhoneBookViewController: UIViewController {
 
+    // coreData를 담는 container
    static var container: NSPersistentContainer?
 
+    // MARK: PhoneBook에 데이터가 있는지 확인하는 flag
     var isEditingBook: PhoneBook?
 
     lazy var profileImageView: UIImageView = {
@@ -58,6 +60,7 @@ class PhoneBookViewController: UIViewController {
         setNavigationController()
     }
 
+    //MARK: UI를 view에 반영해주는 메서드
     private func configureUI() {
         view.backgroundColor = .white
 
@@ -89,6 +92,7 @@ class PhoneBookViewController: UIViewController {
         }
     }
 
+    //MARK: 랜덤 이미지 버튼 event
     @objc func imageChangeBtnTapped() {
         let randomNumber = Int.random(in: 1...251)
 
@@ -97,6 +101,7 @@ class PhoneBookViewController: UIViewController {
             return
         }
 
+        //MARK: 데이터를 불러오는 메서드
         try? fetchData(url: url) { [weak self] data in
             switch data {
             case .success(let data):
@@ -117,7 +122,20 @@ class PhoneBookViewController: UIViewController {
             }
         }
     }
+
+    //MARK: 적용 버튼 event
+    @objc func buttonTapped() {
+        // isEditiongBook을 사용하여 분기처리
+        if isEditingBook == nil {
+            createBookList()
+        } else {
+            guard let updateBook = isEditingBook else { return }
+            updateBookList(phoneBook: updateBook)
+        }
+        navigationController?.popViewController(animated: true)
+    }
 }
+
 
 extension PhoneBookViewController {
     private func setNavigationController() {
@@ -125,22 +143,11 @@ extension PhoneBookViewController {
         navigationItem.title = "연락처 추가"
         navigationItem.rightBarButtonItem = UIBarButtonItem(title: "적용", style: .plain, target: self, action: #selector(buttonTapped))
     }
-
-    @objc func buttonTapped() {
-
-        if isEditingBook == nil {
-            createBookList()
-        } else {
-            guard let updateBook = isEditingBook else { return }
-            updateBookList(phoneBook: updateBook)
-        }
-
-        navigationController?.popViewController(animated: true)
-    }
 }
 
 
 extension PhoneBookViewController {
+    //MARK: 데이터를 불러오는 로직
     private func fetchData(url: URL, completion: @escaping (Result<PocketmonData, CustomError>) -> Void) throws {
         let myUrlSession = URLSession(configuration: .default)
         var request = URLRequest(url: url)
@@ -170,8 +177,9 @@ extension PhoneBookViewController {
     }
 }
 
-extension PhoneBookViewController {
 
+extension PhoneBookViewController {
+    //MARK: 데이터를 생성하는 로직
     func createData(name: String, phoneNumber: String, image: Data) {
         guard let entity = NSEntityDescription.entity(forEntityName: PhoneBook.className, in: PhoneBookViewController.container!.viewContext) else { return }
         let newPhoneBook = NSManagedObject(entity: entity, insertInto: PhoneBookViewController.container?.viewContext)
@@ -186,6 +194,7 @@ extension PhoneBookViewController {
         }
     }
 
+    //MARK: 데이터를 생성하는 메서드
     private func createBookList() {
         let nameData = nameTextField.text ?? ""
         let phoneNumberData = phoneNumberTextField.text ?? ""
@@ -201,6 +210,7 @@ extension PhoneBookViewController {
         createData(name: nameData, phoneNumber: phoneNumberData, image: image)
     }
 
+    //MARK: 데이터를 업데이트하는 메서드
     private func updateBookList(phoneBook: PhoneBook) {
         let nameData = nameTextField.text ?? ""
         let phoneNumberData = phoneNumberTextField.text ?? ""
@@ -227,6 +237,7 @@ extension PhoneBookViewController {
 }
 
 extension PhoneBookViewController {
+    //MARK: alert 생성하는 메서드
     func showAlert(error: CustomError) {
         let alert = UIAlertController(title: "오류", message: error.errorTitle, preferredStyle: .alert)
         alert.addAction(UIAlertAction(title: "확인", style: .default))
